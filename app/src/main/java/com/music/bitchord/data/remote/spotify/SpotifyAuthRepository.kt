@@ -49,7 +49,7 @@ class SpotifyAuthRepository(context: Context) {
     /** Validates state and exchanges the callback's one-time authorization code. */
     suspend fun completeAuthorization(callback: Uri): SpotifyToken = withContext(Dispatchers.IO) {
         callback.getQueryParameter("error")?.let { clearPendingAuth(); error("Spotify authorization was denied: $it") }
-        val normalizedCallback = callback.buildUpon().clearQuery().clearFragment().build().toString()
+        val normalizedCallback = callback.buildUpon().clearQuery().fragment(null).build().toString()
         require(normalizedCallback == redirectUri) { "Spotify callback URI did not match the configured redirect URI." }
         val code = callback.getQueryParameter("code") ?: error("Spotify callback contained no authorization code.")
         val returnedState = callback.getQueryParameter("state")
