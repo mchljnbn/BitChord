@@ -53,6 +53,10 @@ val listenTogetherServer: String = (
         ?: "https://bitchord-listen-together.onrender.com"
     ).trim().trimEnd('/')
 
+// Public OAuth client configuration; never put a client secret in the app.
+val spotifyClientId: String = (localProps.getProperty("SPOTIFY_CLIENT_ID") ?: System.getenv("SPOTIFY_CLIENT_ID") ?: "").trim()
+val spotifyRedirectUri: String = (localProps.getProperty("SPOTIFY_REDIRECT_URI") ?: System.getenv("SPOTIFY_REDIRECT_URI") ?: "").trim()
+
 // See the root build.gradle.kts: one version for the phone and its watch app.
 val betaSuffix = rootProject.extra["bitchordBetaSuffix"] as String
 
@@ -80,6 +84,8 @@ android {
             "LISTEN_TOGETHER_SERVER",
             "\"${listenTogetherServer.replace("\\", "\\\\").replace("\"", "\\\"")}\"",
         )
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"$spotifyClientId\"")
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI", "\"$spotifyRedirectUri\"")
         // Which release assets are this app's: the phone and TV APKs ship in
         // the same GitHub release, told apart by file name. See
         // AppUpdateChecker.apkAssetUrl.
