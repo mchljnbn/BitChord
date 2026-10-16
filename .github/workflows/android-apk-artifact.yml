@@ -1,0 +1,59 @@
+name: Android APK (Debug Artifacts)
+
+on:
+  push:
+    branches:
+      - feat/spotify-primary-provider
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android-apks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build installable debug APKs
+        run: ./gradlew --no-daemon assembleDevDebug assembleProdDebug
+
+      - name: Upload dev APK (installs alongside the regular app)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BitChord-dev-debug-apk
+          path: app/build/outputs/apk/dev/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload prod debug APK (requires uninstalling a differently signed existing install)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BitChord-prod-debug-apk
+          path: app/build/outputs/apk/prod/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Wear OS debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: BitChord-wear-debug-apks
+          path: wearos/build/outputs/apk/**/debug/*.apk
+          if-no-files-found: warn
+          retention-days: 14
